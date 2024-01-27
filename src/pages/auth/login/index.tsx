@@ -1,9 +1,13 @@
 import React from 'react';
+import { useState } from 'react';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import AuthLayout from '../auth-layout';
 import { Button, PasswordTextField, TextField } from '@/components';
 import { LoginPayload } from '@/types';
+import { useDispatch } from 'react-redux';
+import { loginConstant } from '@/redux/constant';
+
 
 const VALIDATION_SCHEMA = Yup.object({
   email: Yup.string()
@@ -40,14 +44,17 @@ const VALIDATION_SCHEMA_REGISTER = Yup.object({
     .required('Confirm Password is required'),
 });
 
-interface IProps {}
+interface IProps {
+  setloginData: React.Dispatch<React.SetStateAction<{}>>;
+  handleModelClose: () => void; // Define handleModelClose as a function that takes no arguments and returns void
+}
 
-const Login: React.FC<IProps> = ({}) => {
+const Login: React.FC<IProps> = ({setloginData,handleModelClose}) => {
   const [showRegister, setShowRegister] = React.useState(false);
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
     email: '',
     password: '',
-  };
+  });
   const registerInitialValues = {
     name: '',
     email: '',
@@ -55,12 +62,46 @@ const Login: React.FC<IProps> = ({}) => {
     password: '',
     cPassword: '',
   };
+  const dispatch: any = useDispatch();
 
   const handleNavigateToRegister = () => setShowRegister(!showRegister);
 
   const handleLogin = async (val: LoginPayload) => {
-    console.log('login error', val);
-    // dispatch(authAction(val));
+    try {
+      const response = await fetch('http://localhost:8080/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(val),
+      });
+      console.log(response, 'response');
+
+      if (response.ok) {
+        // If the response status is 200 OK
+        const data = await response.json();
+        console.log('Login successful:', data);
+        setloginData({ user: data.user });
+        handleModelClose();
+
+
+        // Perform actions after successful login, e.g., update global state
+        dispatch({
+          type: loginConstant.LOGIN_SUCCESS,
+          payload: data,
+        });
+      } else {
+        // If the response status is not OK, handle the error
+        const errorData = await response.json();
+        console.error('Login failed:', errorData);
+
+        // Perform actions for failed login, e.g., show an error message
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+
+      // Handle other errors, e.g., network issues
+    }
   };
 
   return (
@@ -121,8 +162,25 @@ const Login: React.FC<IProps> = ({}) => {
                   name="email"
                   label="Email"
                   placeholder="Enter a email address"
+                  value={initialValues.email}
+                  onChange={(e: any) =>
+                    setInitialValues((prevData) => ({
+                      ...prevData,
+                      email: e.target.value,
+                    }))
+                  }
+
                 />
-                <PasswordTextField name="password" label="Password" />
+                <PasswordTextField name="password" label="Password" 
+                value={initialValues.password}
+                onChange={(e: any) =>
+                  setInitialValues((prevData) => ({
+                    ...prevData,
+                    email: e.target.value,
+                  }))
+                }
+                />
+
                 <div className="flex items-center justify-between my-4">
                   {/* <CheckBox
                     onChange={() => {}}

@@ -7,7 +7,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { modalAction } from '@/redux/action/modal.action';
 import { Link, NavLink } from 'react-router-dom';
 
-interface IProps {}
+interface IProps {
+  setloginData: React.Dispatch<React.SetStateAction<{}>>;
+  loginData: { user: { email: string } | null }; // user could be null initially
+}
 
 const navbarData = [
   {
@@ -38,15 +41,17 @@ const navbarData = [
   },
 ];
 
-const Navbar: React.FC<IProps> = ({}) => {
+const Navbar: React.FC<IProps> = ({setloginData,loginData}) => {
   const modalData = useSelector((state: any) => state?.modalData);
   const dispatch: any = useDispatch();
   const handleModalOpen = () => {
     dispatch(modalAction(true));
   };
   const handleModalClose = () => {
+    
     dispatch(modalAction(false));
   };
+  console.log(loginData,"Login")
 
   return (
     <div className="bg-white py-2 px-4 sm:px-4 md:px-0 border-b border-light-grey">
@@ -71,14 +76,22 @@ const Navbar: React.FC<IProps> = ({}) => {
               onClick={handleModalOpen}
             >
               <FaUserAlt />
-              <p className="font-medium"> Login / Signup</p>
+              <p className="font-medium"> 
+              {
+                loginData.user ? loginData.user.email : "Login / Signup"
+              }
+              </p>
             </button>
           </div>
         </div>
       </Container>
       {modalData?.isOpen && (
         <Modal modalClose={handleModalClose}>
-          <Login />
+          <Login
+          setloginData={setloginData}
+          handleModelClose={handleModalClose}
+
+          />
         </Modal>
       )}
     </div>

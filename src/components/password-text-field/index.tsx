@@ -3,16 +3,20 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import TextField from '../text-field';
 
 interface IProps {
+  value?: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
   label?: string;
 }
 
-const PasswordTextField: React.FC<IProps> = ({ name, label }) => {
+const PasswordTextField: React.FC<IProps> = ({ name, label,value,onChange }) => {
   const [passwordVisibleSwitch, setPasswordVisibleSwitch] =
     React.useState(false);
   return (
     <div className="relative">
       <TextField
+      value={value}
+      onChange={onChange}
         label={label ? label : 'Password'}
         name={name}
         placeholder="Enter a password"
